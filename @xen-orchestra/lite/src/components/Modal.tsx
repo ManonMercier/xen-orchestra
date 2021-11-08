@@ -7,7 +7,7 @@ import Icon, { IconName } from './Icon'
 import IntlMessage from './IntlMessage'
 
 type ModalButton = {
-  label: React.ReactNode
+  label: string | React.ReactNode
   color?: ButtonProps['color']
   reason?: unknown
   value?: unknown
@@ -15,8 +15,8 @@ type ModalButton = {
 
 interface GeneralParamsModal {
   icon: IconName
-  message: string | JSX.Element
-  title: string | JSX.Element
+  message: string | React.ReactNode
+  title: string | React.ReactNode
 }
 
 interface ModalParams extends GeneralParamsModal {
@@ -70,11 +70,11 @@ interface ParentState {}
 interface State {
   buttonList?: ModalButton[]
   icon?: IconName
-  message?: string | JSX.Element
+  message?: string | React.ReactNode
   onReject?: (reason: unknown) => void
   onSuccess?: (value: unknown) => void
   showModal: boolean
-  title?: string | JSX.Element
+  title?: string | React.ReactNode
 }
 
 interface Props {}
