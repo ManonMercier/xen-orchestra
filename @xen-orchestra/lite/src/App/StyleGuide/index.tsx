@@ -23,6 +23,8 @@ interface ParentEffects {}
 
 interface Effects {
   sayHello: () => void
+  showAlertModal: () => void
+  showConfirmModal: () => void
 }
 
 interface Computed {}
@@ -56,6 +58,13 @@ const App = withState<State, Props, Effects, Computed, ParentState, ParentEffect
   {
     effects: {
       sayHello: () => window.alert('hello'),
+      showAlertModal: () => alert({ message: 'This is an alert modal', title: 'Alert modal', icon: 'info' }),
+      showConfirmModal: () =>
+        confirm({
+          message: 'This is a confirm modal test',
+          title: 'Confirm modal',
+          icon: 'download',
+        }),
     },
   },
   ({ effects }) => (
@@ -116,29 +125,26 @@ const App = withState<State, Props, Effects, Computed, ParentState, ParentEffect
         <Render>
           <Button
             color='primary'
-            onClick={() => alert({ message: 'This is an alert modal', title: 'Alert modal', icon: 'info' })}
+            onClick={effects.showAlertModal}
             sx={{
               marginBottom: 1,
             }}
           >
             Alert
           </Button>
-          <Button
-            color='primary'
-            onClick={() =>
-              confirm({
-                message: 'This is a confirm modal test',
-                title: 'Confirm modal',
-                icon: 'download',
-              })
-            }
-          >
+          <Button color='primary' onClick={effects.showConfirmModal}>
             Confirm
           </Button>
         </Render>
         <Code>{`<Button
   color='primary'
-  onClick={() => alert({ message: 'This is an alert modal', title: 'Alert modal', icon: 'info' })}
+  onClick={() =>
+    alert({
+      message: 'This is an alert modal',
+      title: 'Alert modal',
+      icon: 'info'
+    })
+  }
 >
   Alert
 </Button>
