@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dialog, DialogContent, DialogContentText, DialogActions, DialogTitle } from '@mui/material'
+import { ButtonProps, Dialog, DialogContent, DialogContentText, DialogActions, DialogTitle } from '@mui/material'
 import { withState } from 'reaclette'
 
 import Button from './Button'
@@ -8,7 +8,7 @@ import IntlMessage from './IntlMessage'
 
 type ModalButton = {
   label: React.ReactNode
-  level: string
+  color?: ButtonProps['color']
   reason?: unknown
   value?: unknown
 }
@@ -39,10 +39,10 @@ const modal = ({ buttonList, icon, message, title }: ModalParams) =>
   })
 
 export const alert = (params: GeneralParamsModal): Promise<unknown> => {
-  const buttonList = [
+  const buttonList: ModalButton[] = [
     {
       label: <IntlMessage id='ok' />,
-      level: 'primary',
+      color: 'primary',
       value: 'success',
     },
   ]
@@ -50,15 +50,15 @@ export const alert = (params: GeneralParamsModal): Promise<unknown> => {
 }
 
 export const confirm = (params: GeneralParamsModal): Promise<unknown> => {
-  const buttonList = [
+  const buttonList: ModalButton[] = [
     {
       label: <IntlMessage id='confirm' />,
-      level: 'primary',
       value: 'success',
+      color: 'success',
     },
     {
       label: <IntlMessage id='cancel' />,
-      level: 'danger',
+      color: 'secondary',
       reason: 'reject',
     },
   ]
@@ -118,19 +118,19 @@ const Modal = withState<State, Props, Effects, Computed, ParentState, ParentEffe
     },
     computed: {
       buttons: ({ buttonList, onSuccess, onReject }) =>
-        buttonList?.map((button, index) => {
+        buttonList?.map(({ label, value, reason, ...props }, index) => {
           const _button = (cb: () => void) => {
             const onClick = () => {
-              if (button.value !== undefined) {
-                onSuccess?.(button.value)
+              if (value !== undefined) {
+                onSuccess?.(value)
               } else {
-                onReject?.(button.reason)
+                onReject?.(reason)
               }
               cb()
             }
             return (
-              <Button key={index} onClick={onClick}>
-                {button.label}
+              <Button key={index} onClick={onClick} {...props}>
+                {label}
               </Button>
             )
           }

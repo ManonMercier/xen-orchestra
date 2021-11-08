@@ -114,10 +114,17 @@ const App = withState<State, Props, Effects, Computed, ParentState, ParentEffect
       <h2>Modal</h2>
       <Container>
         <Render>
-          <Button onClick={() => alert({ message: 'This is a alert message', title: 'Alert modal', icon: 'info' })}>
+          <Button
+            color='primary'
+            onClick={() => alert({ message: 'This is an alert modal', title: 'Alert modal', icon: 'info' })}
+            sx={{
+              marginBottom: 1,
+            }}
+          >
             Alert
           </Button>
           <Button
+            color='primary'
             onClick={() =>
               confirm({
                 message: 'This is a confirm modal test',
@@ -129,7 +136,24 @@ const App = withState<State, Props, Effects, Computed, ParentState, ParentEffect
             Confirm
           </Button>
         </Render>
-        <Code>{`<Button>Button></Button>`}</Code>
+        <Code>{`<Button
+  color='primary'
+  onClick={() => alert({ message: 'This is an alert modal', title: 'Alert modal', icon: 'info' })}
+>
+  Alert
+</Button>
+<Button
+  color='primary'
+  onClick={() =>
+    confirm({
+      message: 'This is a confirm modal',
+      title: 'Confirm modal',
+      icon: 'download',
+    })
+  }
+>
+  Confirm
+</Button>`}</Code>
       </Container>
       <h2>Input</h2>
       <Container>
