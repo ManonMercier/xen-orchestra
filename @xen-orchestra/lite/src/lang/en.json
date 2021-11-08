@@ -19,6 +19,7 @@
   "login": "Login",
   "name": "Name",
   "noData": "No data",
+  "noImplemented": "Not implemented",
   "noManagementPifs": "No management PIFs found",
   "notFound": "Not Found",
   "pageNotFound": "This page doesn't exist.",
@@ -32,5 +33,6 @@
   "size": "Size",
   "suspended": "Suspended",
   "version": "Version",
-  "versionValue": "Version {version}"
+  "versionValue": "Version {version}",
+  "VmStartLabel": "Start"
 }
