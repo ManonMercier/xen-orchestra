@@ -87,7 +87,7 @@ interface Effects {
 }
 
 interface Computed {
-  buttons?: ((cb: () => void) => JSX.Element)[]
+  buttons: ((cb: () => void) => JSX.Element)[] | undefined
 }
 
 const Modal = withState<State, Props, Effects, Computed, ParentState, ParentEffects>(
