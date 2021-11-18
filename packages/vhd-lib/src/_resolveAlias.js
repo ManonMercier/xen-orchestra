@@ -8,6 +8,11 @@ export async function resolveAlias(handler, filename) {
   if (!isVhdAlias(filename)) {
     return filename
   }
+  const size = await handler.getSize(filename)
+  if (size > 1024) {
+    // seems reasonnable for a relative path
+    throw new Error(`The alias file ${filename} is too big (${size} octet)`)
+  }
   const aliasContent = (await handler.readFile(filename)).toString().trim()
   // also handle circular references and unreasonnably long chains
   if (isVhdAlias(aliasContent)) {
