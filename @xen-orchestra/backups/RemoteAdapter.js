@@ -6,7 +6,7 @@ const pDefer = require('promise-toolbox/defer.js')
 const pump = require('pump')
 const { basename, dirname, join, normalize, resolve } = require('path')
 const { createLogger } = require('@xen-orchestra/log')
-const { createSyntheticStream, mergeVhd, VhdFile } = require('vhd-lib')
+const { VhdAbstract, createVhdDirectoryFromStream } = require('vhd-lib')
 const { deduped } = require('@vates/disposable/deduped.js')
 const { execFile } = require('child_process')
 const { readdir, stat } = require('fs-extra')
@@ -213,7 +213,7 @@ class RemoteAdapter {
     const handler = this._handler
 
     // unused VHDs will be detected by `cleanVm`
-    await asyncMapSettled(backups, ({ _filename }) => handler.unlink(_filename))
+    await asyncMapSettled(backups, ({ _filename }) => VhdAbstract.unlink(handler, _filename))
   }
 
   async deleteMetadataBackup(backupId) {
