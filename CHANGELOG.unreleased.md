@@ -35,7 +35,7 @@
 >
 > In case of conflict, the highest (lowest in previous list) `$version` wins.
 
-- xo-remote-parser
+- xo-remote-parser minor
 - vhd-lib minor
 - @xen-orchestra/backup minor
 - @xen-orchestra/proxy minor
