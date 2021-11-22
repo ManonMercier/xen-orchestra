@@ -145,7 +145,7 @@ exports.DeltaBackupWriter = class DeltaBackupWriter extends MixinBackupWriter(Ab
               // don't do delta for it
               vdi.uuid
             : vdi.$snapshot_of$uuid
-        }/${basename}.vhd`
+        }/${adapter.getVhdFileName(basename)}`
     )
 
     const metadataFilename = `${backupDir}/${basename}.json`
