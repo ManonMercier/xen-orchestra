@@ -82,8 +82,8 @@ interface Props {}
 interface ParentEffects {}
 
 interface Effects {
-  _closeModal: () => void
-  _reject: (reason: unknown) => void
+  closeModal: () => void
+  reject: (reason: unknown) => void
 }
 
 interface Computed {
@@ -108,12 +108,12 @@ const Modal = withState<State, Props, Effects, Computed, ParentState, ParentEffe
         }
         instance = this
       },
-      _closeModal: function () {
+      closeModal: function () {
         this.state.showModal = false
       },
-      _reject: function (reason) {
+      reject: function (reason) {
         this.state.onReject?.(reason)
-        this.effects._closeModal()
+        this.effects.closeModal()
       },
     },
     computed: {
@@ -139,18 +139,18 @@ const Modal = withState<State, Props, Effects, Computed, ParentState, ParentEffe
     },
   },
   ({ effects, state }) => {
-    const { _closeModal, _reject } = effects
+    const { closeModal, reject } = effects
     const { buttons, icon, message, showModal, title } = state
 
     return showModal ? (
-      <Dialog open={showModal} onClose={_reject}>
+      <Dialog open={showModal} onClose={reject}>
         <DialogTitle>
           {icon !== undefined && <Icon icon={icon} />} {title}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>{message}</DialogContentText>
         </DialogContent>
-        <DialogActions>{buttons?.map(button => button(_closeModal))}</DialogActions>
+        <DialogActions>{buttons?.map(button => button(closeModal))}</DialogActions>
       </Dialog>
     ) : null
   }
