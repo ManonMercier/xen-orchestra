@@ -118,23 +118,21 @@ const Modal = withState<State, Props, Effects, Computed, ParentState, ParentEffe
     },
     computed: {
       buttons: ({ buttonList, onSuccess, onReject }) =>
-        buttonList?.map(({ label, value, reason, ...props }, index) => {
-          const _button = (cb: () => void) => {
-            const onClick = () => {
-              if (value !== undefined) {
-                onSuccess?.(value)
-              } else {
-                onReject?.(reason)
-              }
-              cb()
+        // eslint-disable-next-line react/display-name
+        buttonList?.map(({ label, value, reason, ...props }, index) => (cb: () => void) => {
+          const onClick = () => {
+            if (value !== undefined) {
+              onSuccess?.(value)
+            } else {
+              onReject?.(reason)
             }
-            return (
-              <Button key={index} onClick={onClick} {...props}>
-                {label}
-              </Button>
-            )
+            cb()
           }
-          return _button
+          return (
+            <Button key={index} onClick={onClick} {...props}>
+              {label}
+            </Button>
+          )
         }),
     },
   },
