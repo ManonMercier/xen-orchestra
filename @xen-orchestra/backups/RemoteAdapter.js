@@ -77,48 +77,6 @@ class RemoteAdapter {
     return this._handler
   }
 
-  async _deleteVhd(path) {
-    const handler = this._handler
-    const vhds = await asyncMapSettled(
-      await handler.list(dirname(path), {
-        filter: isVhdFile,
-        prependDir: true,
-      }),
-      async path => {
-        try {
-          const vhd = new VhdFile(handler, path)
-          await vhd.readHeaderAndFooter()
-          return {
-            footer: vhd.footer,
-            header: vhd.header,
-            path,
-          }
-        } catch (error) {
-          // Do not fail on corrupted VHDs (usually uncleaned temporary files),
-          // they are probably inconsequent to the backup process and should not
-          // fail it.
-          warn(`BackupNg#_deleteVhd ${path}`, { error })
-        }
-      }
-    )
-    const base = basename(path)
-    const child = vhds.find(_ => _ !== undefined && _.header.parentUnicodeName === base)
-    if (child === undefined) {
-      await handler.unlink(path)
-      return 0
-    }
-
-    try {
-      const childPath = child.path
-      const mergedDataSize = await mergeVhd(handler, path, handler, childPath)
-      await handler.rename(path, childPath)
-      return mergedDataSize
-    } catch (error) {
-      handler.unlink(path).catch(warn)
-      throw error
-    }
-  }
-
   async _findPartition(devicePath, partitionId) {
     const partitions = await listPartitions(devicePath)
     const partition = partitions.find(_ => _.id === partitionId)
