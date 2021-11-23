@@ -20,7 +20,7 @@ async function* parse(stream) {
   // handle empty space between elements
   // ensure we read stream in order
   async function read(offset, size) {
-    assert(bytesRead <= offset)
+    assert(bytesRead <= offset, `offset is ${offset} but we already read ${bytesRead} bytes`)
     if (bytesRead < offset) {
       // empty spaces
       await read(bytesRead, offset - bytesRead)
@@ -45,42 +45,7 @@ async function* parse(stream) {
   const blockSize = header.blockSize
   const blockAndBitmapSize = blockBitmapSize + blockSize
 
-  const batOffset = header.tableOffset
-  const batSize = Math.max(1, Math.ceil((header.maxTableEntries * 4) / SECTOR_SIZE)) * SECTOR_SIZE
-  /**
-   * the norm allows the BAT to be after some blocks or parent locator
-   * we do not handle this case for now since we need the BAT to order the blocks/parent locator
-   *
-   * also there can be some free space between header and the start of BAT
-   */
-
-  const bat = await read(batOffset, batSize)
-
-  /**
-   * the norm allows blocks and parent locators  to be intervined
-   *
-   * we build a sorted index since we read the stream sequentially and
-   * we need to know what is the the next element to read and its size
-   * (parent locator size can vary)
-   */
-
   const index = []
-  for (let blockCounter = 0; blockCounter < header.maxTableEntries; blockCounter++) {
-    const batEntrySector = bat.readUInt32BE(blockCounter * 4)
-    // unallocated block, no need to export it
-    if (batEntrySector === BLOCK_UNUSED) {
-      continue
-    }
-    const batEntryBytes = batEntrySector * SECTOR_SIZE
-    // ensure the block is not before the bat
-    assert.ok(batEntryBytes >= batOffset + batSize)
-    index.push({
-      type: 'block',
-      id: blockCounter,
-      offset: batEntryBytes,
-      size: blockAndBitmapSize,
-    })
-  }
 
   for (const parentLocatorId in header.parentLocatorEntry) {
     const parentLocatorEntry = header.parentLocatorEntry[parentLocatorId]
@@ -88,29 +53,61 @@ async function* parse(stream) {
     if (parentLocatorEntry.platformDataSpace === 0) {
       continue
     }
-    assert.ok(parentLocatorEntry.platformDataOffset * SECTOR_SIZE >= batOffset + batSize)
-
     index.push({
+      ...parentLocatorEntry,
       type: 'parentLocator',
-      offset: parentLocatorEntry.platformDataOffset * SECTOR_SIZE,
-      size: parentLocatorEntry.platformDataSpace * SECTOR_SIZE,
+      offset: parentLocatorEntry.platformDataOffset,
+      size: parentLocatorEntry.platformDataLength,
       id: parentLocatorId,
     })
   }
 
-  index.sort((a, b) => a.offset - b.offset)
+  const batOffset = header.tableOffset
+  const batSize = Math.max(1, Math.ceil((header.maxTableEntries * 4) / SECTOR_SIZE)) * SECTOR_SIZE
 
-  for (const item of index) {
+  index.push({
+    type: 'bat',
+    offset: batOffset,
+    size: batSize,
+  })
+
+  // sometimes some parent locator are before the BAT
+  index.sort((a, b) => a.offset - b.offset)
+  let item
+  while ((item = index.shift())) {
     const buffer = await read(item.offset, item.size)
-    yield { ...item, buffer }
+    if (item.type === 'bat') {
+      // found the BAT : read it and ad block to index
+      for (let blockCounter = 0; blockCounter < header.maxTableEntries; blockCounter++) {
+        const batEntrySector = buffer.readUInt32BE(blockCounter * 4)
+        // unallocated block, no need to export it
+        if (batEntrySector === BLOCK_UNUSED) {
+          continue
+        }
+        const batEntryBytes = batEntrySector * SECTOR_SIZE
+        // ensure the block is not before the bat
+        assert.ok(batEntryBytes >= batOffset + batSize)
+        index.push({
+          type: 'block',
+          id: blockCounter,
+          offset: batEntryBytes,
+          size: blockAndBitmapSize,
+        })
+      }
+      // sort again index to ensure block and parent locator are in the right order
+      index.sort((a, b) => a.offset - b.offset)
+    } else {
+      yield { ...item, buffer }
+    }
   }
+
   /**
    * the second footer is at filesize - 512 , there can be empty spaces between last block
    * and the start of the footer
    *
    * we read till the end of the stream, and use the last 512 bytes as the footer
    */
-  const bufFooterEnd = await readLastSector()
+  const bufFooterEnd = await readLastSector(stream)
   assert(bufFooter.equals(bufFooterEnd), 'footer1 !== footer2')
 }
 
