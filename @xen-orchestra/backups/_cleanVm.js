@@ -287,11 +287,10 @@ exports.cleanVm = async function cleanVm(
 
     const metadataSize = metadata.size
     if (size !== undefined && metadataSize !== size) {
-      onLog(`incorrect size in metadata: ${metadataSize ?? 'none'} instead of ${size}`)
-
-      // don't update if the the stored size is greater than found files,
-      // it can indicates a problem
-      if (fixMetadata && (metadataSize === undefined || metadataSize < size)) {
+      if (metadataSize !== undefined && metadataSize > size) {
+        // the file may have been truncated, warn user
+        onLog(`incorrect size in metadata: ${metadataSize} instead of ${size}`)
+      } else if (fixMetadata) {
         try {
           metadata.size = size
           await handler.writeFile(json, JSON.stringify(metadata), { flags: 'w' })

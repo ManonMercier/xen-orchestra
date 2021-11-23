@@ -12,6 +12,7 @@
 > Users must be able to say: “I had this issue, happy to know it's fixed”
 
 [Import/VM] Fix the import of OVA files (PR [#5976](https://github.com/vatesfr/xen-orchestra/pull/5976))
+[Backup/clean] Warn for incorrect size only when it's unfixable automatically (PR [#6010](https://github.com/vatesfr/xen-orchestra/pull/6010))
 
 ### Packages to release
 
